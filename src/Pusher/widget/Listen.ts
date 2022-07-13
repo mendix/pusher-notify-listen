@@ -42,8 +42,8 @@ class NotifyListen extends WidgetBase {
                     this.showError("Authentication key and cluster are required. Please make sure Pusher.Pusher_Key and Pusher.Pusher_Cluster constants are set.");
                     return;
                 }
-                if ([ "mt1", "us2", "us3", "eu", "ap1", "ap2", "ap3", "ap4", "sa1" ]. indexOf(keyData.cluster) === -1) {
-                    this.showError(`Authentication cluster "${keyData.cluster}" is not supported. Please make sure  Pusher.Pusher_Cluster constants are set to "mt1", "us2", "us3", "eu", "ap1", "ap2", "ap3", "ap4" or "sa1");
+                if ([ "eu", "mt1", "us2", "ap1", "ap2" ]. indexOf(keyData.cluster) === -1) {
+                    this.showError(`Authentication cluster "${keyData.cluster}" is not supported. Please make sure  Pusher.Pusher_Cluster constants are set to "eu", "mt1", "us2", "ap1" or "ap2"`);
                     return;
                 }
                 this.pusher = new Pusher(keyData.key, {
