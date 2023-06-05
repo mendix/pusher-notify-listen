@@ -28,6 +28,8 @@ type ActionOptions = "callNanoflow" | "callMicroflow";
 class NotifyListen extends WidgetBase {
     // Modeler settings - Action
     actionList: Action[];
+    authEndpoint:"rest/pusher/auth";
+    keyEndpoint:"rest/pusher/key";
 
     private pusher: Pusher.Pusher;
     private channelName: string;
@@ -45,7 +47,7 @@ class NotifyListen extends WidgetBase {
                 this.pusher = new Pusher(keyData.key, {
                     cluster: keyData.cluster,
                     encrypted: true,
-                    authEndpoint: baseUrl + "rest/pusher/auth",
+                    authEndpoint: baseUrl + authEndpoint,
                     auth: {
                         headers: {
                             "X-Csrf-Token": mx.session.getConfig("csrftoken")
@@ -107,8 +109,8 @@ class NotifyListen extends WidgetBase {
 
     private getKey(): Promise<KeyData> {
         const baseUrl = window.dojoConfig.remotebase ? window.dojoConfig.remotebase : mx.appUrl;
-        console.log("Request auth " + baseUrl + "rest/pusher/key");
-        const request = new Request(baseUrl + "rest/pusher/key", {
+        console.log("Request auth " + baseUrl + keyEndpoint);
+        const request = new Request(baseUrl + keyEndpoint, {
             method: "get",
             credentials: "same-origin",
             headers: {
