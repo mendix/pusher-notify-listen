@@ -33,7 +33,7 @@ class NotifyListen extends WidgetBase {
     private channelName: string;
 
     postCreate() {
-        window.logger.debug(this.friendlyId + ".postCreate");
+        window.console.debug(this.friendlyId + ".postCreate");
         const message = this.validateSettings();
         if (!message) {
             this.getKey().then(keyData => {
@@ -53,13 +53,13 @@ class NotifyListen extends WidgetBase {
                     }
                 });
                 this.pusher.connection.bind("error", error => {
-                    window.logger.error(this.friendlyId, "Error Pusher js connection", error);
+                    window.console.error(this.friendlyId, "Error Pusher js connection", error);
                 });
                 this.pusher.connection.bind("state_change", states => {
-                    window.logger.debug(this.friendlyId, "current state is " + states.current);
+                    window.console.debug(this.friendlyId, "current state is " + states.current);
                 });
             }).then(() => {
-                window.logger.debug(this.friendlyId + ".postCreate after pusher");
+                window.console.debug(this.friendlyId + ".postCreate after pusher");
                 const contextObject = this.mxcontext.getTrackObject();
                 if (contextObject) {
                     this.subscribeChannel(contextObject);
@@ -71,7 +71,7 @@ class NotifyListen extends WidgetBase {
     }
 
     update(contextObject: mendix.lib.MxObject, callback?: () => void) {
-        window.logger.debug(this.friendlyId + ".update");
+        window.console.debug(this.friendlyId + ".update");
         if (this.pusher) {
             this.subscribeChannel(contextObject);
         }
@@ -82,7 +82,7 @@ class NotifyListen extends WidgetBase {
     }
 
     uninitialize(): boolean {
-        window.logger.debug(this.friendlyId + ".uninitialize");
+        window.console.debug(this.friendlyId + ".uninitialize");
         if (this.pusher) {
             this.pusher.disconnect();
         }
@@ -121,7 +121,7 @@ class NotifyListen extends WidgetBase {
                 if (status === 200) {
                     return response.text();
                 } else {
-                    logger.warn("Couldn't get key data from your web app", status);
+                    console.warn("Couldn't get key data from your web app", status);
                     throw status;
                 }
             })
@@ -130,14 +130,14 @@ class NotifyListen extends WidgetBase {
                     return JSON.parse(data);
                 } catch (error) {
                     const message = "JSON returned from web app key request is invalid, yet status code was 200. Data was: " + data;
-                    logger.warn(message);
+                    console.warn(message);
                     throw message;
                 }
             });
     }
 
     private subscribeChannel(object: mendix.lib.MxObject) {
-        window.logger.debug(this.friendlyId + ".subscribeChannel");
+        window.console.debug(this.friendlyId + ".subscribeChannel");
         if (object) {
             const newChannelName = "private-" + object.getEntity() + "." + object.getGuid();
             if (newChannelName !== this.channelName) {
@@ -145,17 +145,17 @@ class NotifyListen extends WidgetBase {
                     this.pusher.unsubscribe(this.channelName);
                 }
                 this.channelName = newChannelName;
-                window.logger.debug(this.friendlyId + ".subscribeChannel", this.channelName);
+                window.console.debug(this.friendlyId + ".subscribeChannel", this.channelName);
                 const channel = this.pusher.subscribe(this.channelName);
                 this.actionList.forEach(action => {
                     channel.bind(action.actionName, (data: MessageData) => {
-                        window.logger.debug(this.friendlyId + " received data ", data);
+                        window.console.debug(this.friendlyId + " received data ", data);
                         if (action.action === "callMicroflow") {
                             this.callMicroflow(action.microflow);
                         } else if (action.action === "callNanoflow") {
                             this.callNanoflow(action.nanoflow);
                         } else {
-                            window.logger.warn("Unknown action", action.action);
+                            window.console.warn("Unknown action", action.action);
                         }
                     });
                     channel.bind("pusher:subscription_error", error => {
@@ -163,7 +163,7 @@ class NotifyListen extends WidgetBase {
                             this.showError("Authentication key, secret, app ID and cluster are required. Please make sure Pusher.Pusher_Key, Pusher.Pusher_Cluster, Pusher.Pusher_App_ID and Pusher.Pusher_Secret constants are set.");
                             return;
                         }
-                        window.logger.error(this.friendlyId, "subscription_error", error);
+                        window.console.error(this.friendlyId, "subscription_error", error);
                     });
                 });
             }
@@ -180,7 +180,7 @@ class NotifyListen extends WidgetBase {
             context: this.mxcontext,
             error: error => {
                 window.mx.ui.error(`An error occurred while executing the nanoflow: ${error.message}`);
-                window.logger.error(this.friendlyId + " An error occurred while executing a nanoflow:", error);
+                window.console.error(this.friendlyId + " An error occurred while executing a nanoflow:", error);
             }
         });
     }
@@ -196,7 +196,7 @@ class NotifyListen extends WidgetBase {
 
     private showError(message: string) {
         domConstruct.place(`<div class='alert alert-danger'>Pusher Listen: ${message}</div>`, this.domNode, "first");
-        window.logger.error(this.friendlyId, message);
+        window.console.error(this.friendlyId, message);
     }
 }
 
